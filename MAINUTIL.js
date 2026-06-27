@@ -55,7 +55,7 @@ function removeItem(array, ...itemsToRemove) {
     }
 }
 
-let currentAnims = []
+let currentAnims = {}
 let currentSounds = new Map() //turn this to a map
 
 //for func in playsound and animation, you can use the same ones in addeventlistener
@@ -110,25 +110,25 @@ function endSound(elem){
     }
 }
 
-//TODO : rework this in a way that will assign the currentAnims variables as intervals
-
 function animate(elem, asset, loop, func, ...parameters){
-    if(currentAnims.includes(elem))
-        return;
-
     const frame = 24
-    var anim = setInterval;
-    currentAnims.push(elem)
-    
+    const elemtmp = elem
+
+    if(eval("currentAnims."+elemtmp) != undefined){
+        eval("clearInterval(currentAnims."+elemtmp+")")
+    }
+
+    window[elem] = 0
+
     switch(loop){
         case false:
             var i=0;
-            anim = setInterval(() => {
-                document.getElementById(elem).src = asset[i];
+            elem = setInterval(() => {
+                document.getElementById(elemtmp).src = asset[i];
                 if(i >= asset.length - 1){
                     if(func != undefined) func(parameters)
-                    removeItem(currentAnims, elem)
-                    clearInterval(anim);
+                    eval("delete currentAnims."+elemtmp)
+                    eval("clearInterval(currentAnims."+elemtmp+")")
                 }
                 else
                     i++
@@ -136,10 +136,8 @@ function animate(elem, asset, loop, func, ...parameters){
             break;
         case true:
             var i=0;
-            anim = setInterval(() => {
-                if(!currentAnims.includes(elem)) clearInterval(anim);
-
-                document.getElementById(elem).src = asset[i];
+            elem = setInterval(() => {
+                document.getElementById(elemtmp).src = asset[i];
                 if(func != undefined) func(parameters)
                 if(i >= asset.length - 1){
                     i=0
@@ -148,6 +146,9 @@ function animate(elem, asset, loop, func, ...parameters){
                     i++
             }, frame);
     }
+
+    currentAnims[elemtmp] = elem
+
     return true;
 }
 
